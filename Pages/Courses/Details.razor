@@ -74,7 +74,7 @@
                                                 <p class="text-gray-600 mt-1">@module.Description</p>
                                             </div>
                                             <div class="flex space-x-2">
-                                                <button @onclick="() => EditModule(module)"
+                                                <button @onclick="() => ShowEditModule(module)"
                                                         class="text-blue-600 hover:text-blue-700">
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -101,13 +101,25 @@
     }
 </div>
 
+<Modal Show="showEditModule" Title="Edit Module" OnClose="@(() => CancelEdit())">
+    @if (editingModule != null)
+    {
+        <ModuleForm 
+            ModuleModel="@editingModule"
+            OnValidSubmit="@HandleEditModule"
+            OnCancel="@(() => CancelEdit())" />
+    }
+</Modal>
+
 @code {
     [Parameter]
     public int Id { get; set; }
 
     private Course? course;
     private bool showAddModule;
+    private bool showEditModule;
     private ModuleModel newModule = new();
+    private ModuleModel? editingModule;
 
     protected override async Task OnInitializedAsync()
     {
@@ -142,9 +154,43 @@
         }
     }
 
-    private void EditModule(Module module)
+    private void ShowEditModule(Module module)
     {
-        // TODO: Implement module editing
+        editingModule = new ModuleModel
+        {
+            Id = module.Id,
+            Title = module.Title,
+            Description = module.Description,
+            Order = module.Order,
+            CourseId = Id
+        };
+        showEditModule = true;
+        StateHasChanged();
+    }
+
+    private void CancelEdit()
+    {
+        showEditModule = false;
+        editingModule = null;
+        StateHasChanged();
+    }
+
+    private async Task HandleEditModule(ModuleModel model)
+    {
+        try
+        {
+            if (model == null) return;
+            
+            await CourseService.UpdateModuleAsync(model);
+            await LoadCourse();
+            showEditModule = false;
+            editingModule = null;
+            NotificationService.ShowSuccess("Module updated successfully");
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError($"Failed to update module: {ex.Message}");
+        }
     }
 
     private async Task DeleteModule(Module module)

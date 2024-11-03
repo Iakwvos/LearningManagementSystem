@@ -3,7 +3,7 @@
 @inject CourseService CourseService
 @inject NotificationService NotificationService
 
-<div class="container mx-auto px-4 py-8">
+<div class="min-h-screen bg-gray-100 p-8">
     <div class="max-w-3xl mx-auto">
         @if (courseModel == null)
         {
@@ -47,7 +47,7 @@
         }
         catch (Exception ex)
         {
-            NotificationService.ShowError("Failed to update course");
+            NotificationService.ShowError($"Failed to update course: {ex.Message}");
         }
     }
 
@@ -73,11 +73,5 @@
             Description = course.Description,
             ImageUrl = course.ImageUrl ?? string.Empty
         };
-    }
-} 
-
-    private void HandleCancel()
-    {
-        NavigationManager.NavigateTo($"/courses/{Id}");
     }
 } 

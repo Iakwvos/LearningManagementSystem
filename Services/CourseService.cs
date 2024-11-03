@@ -139,6 +139,8 @@ public class CourseService
     {
         try
         {
+            _logger.LogInformation("Updating module {ModuleId} for course {CourseId}", model.Id, model.CourseId);
+            
             var course = await _courseRepository.GetCourseWithModulesAsync(model.CourseId);
             if (course == null)
             {
@@ -153,9 +155,28 @@ public class CourseService
                 return;
             }
 
+            // Update module properties
             module.Title = model.Title;
             module.Description = model.Description;
-            module.Order = model.Order;
+
+            // Handle reordering if the order has changed
+            if (module.Order != model.Order)
+            {
+                var modules = course.Modules.OrderBy(m => m.Order).ToList();
+                
+                // Remove from old position
+                modules.Remove(module);
+                
+                // Insert at new position
+                var newIndex = Math.Min(Math.Max(0, model.Order - 1), modules.Count);
+                modules.Insert(newIndex, module);
+                
+                // Update all module orders
+                for (int i = 0; i < modules.Count; i++)
+                {
+                    modules[i].Order = i + 1;
+                }
+            }
 
             await _courseRepository.UpdateAsync(course);
             _notificationService.ShowSuccess("Module updated successfully");
