@@ -25,6 +25,10 @@
       "PackagePath": "staticwebassets\\favicon.png"
     },
     {
+      "Id": "C:\\Users\\iakwv\\Desktop\\Learning Management System\\LMS.Web\\wwwroot\\js\\dragDrop.js",
+      "PackagePath": "staticwebassets\\js\\dragDrop.js"
+    },
+    {
       "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.LMS.Web.Microsoft.AspNetCore.StaticWebAssets.props",
       "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
     },

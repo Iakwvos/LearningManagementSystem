@@ -2,6 +2,7 @@
 @inject NavigationManager NavigationManager
 @inject CourseService CourseService
 @inject NotificationService NotificationService
+@inject IJSRuntime JSRuntime
 
 <div class="min-h-screen bg-gray-100 p-8">
     @if (course == null)
@@ -67,11 +68,25 @@
                             <div class="space-y-4">
                                 @foreach (var module in course.Modules.OrderBy(m => m.Order))
                                 {
-                                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-move @(draggedModuleId == module.Id ? "module-dragging" : "") @(dragOverModuleId == module.Id ? "module-drag-over" : "")"
+                                         draggable="true"
+                                         @ondragstart="@(() => HandleDragStart(module))"
+                                         @ondragover:preventDefault
+                                         @ondragover="@(() => HandleDragOver(module))"
+                                         @ondragleave="@(() => HandleDragLeave())"
+                                         @ondrop="@(() => HandleDrop(module))">
                                         <div class="flex justify-between items-start">
-                                            <div>
-                                                <h3 class="text-lg font-medium text-gray-900">@module.Title</h3>
-                                                <p class="text-gray-600 mt-1">@module.Description</p>
+                                            <div class="flex items-center space-x-3">
+                                                <div class="text-gray-400">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                              d="M4 8h16M4 16h16" />
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <h3 class="text-lg font-medium text-gray-900">@module.Title</h3>
+                                                    <p class="text-gray-600 mt-1">@module.Description</p>
+                                                </div>
                                             </div>
                                             <div class="flex space-x-2">
                                                 <button @onclick="() => ShowEditModule(module)"
@@ -120,6 +135,9 @@
     private bool showEditModule;
     private ModuleModel newModule = new();
     private ModuleModel? editingModule;
+    private Module? draggedModule;
+    private int? draggedModuleId;
+    private int? dragOverModuleId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -204,6 +222,56 @@
         catch (Exception ex)
         {
             NotificationService.ShowError($"Failed to delete module: {ex.Message}");
+        }
+    }
+
+    private void HandleDragStart(Module module)
+    {
+        draggedModule = module;
+        draggedModuleId = module.Id;
+    }
+
+    private void HandleDragOver(Module module)
+    {
+        if (module.Id != draggedModuleId)
+        {
+            dragOverModuleId = module.Id;
+        }
+    }
+
+    private void HandleDragLeave()
+    {
+        dragOverModuleId = null;
+    }
+
+    private async Task HandleDrop(Module targetModule)
+    {
+        if (draggedModule == null || draggedModule.Id == targetModule.Id) return;
+
+        try
+        {
+            var moduleModel = new ModuleModel
+            {
+                Id = draggedModule.Id,
+                Title = draggedModule.Title,
+                Description = draggedModule.Description,
+                Order = targetModule.Order,
+                CourseId = Id
+            };
+
+            await CourseService.UpdateModuleAsync(moduleModel);
+            await LoadCourse();
+            NotificationService.ShowSuccess("Module order updated");
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError($"Failed to reorder module: {ex.Message}");
+        }
+        finally
+        {
+            draggedModule = null;
+            draggedModuleId = null;
+            dragOverModuleId = null;
         }
     }
 } 

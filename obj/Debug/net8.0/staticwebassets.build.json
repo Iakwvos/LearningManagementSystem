@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "duMGeO/ZlUY8oJykbm1PtV2caTzwSx9bySg0vpS/2Yw=",
+  "Hash": "Tch07S4uB2bFq6w5NkKuSWt0ZkcotFrA3DZ+C4P1QN8=",
   "Source": "LMS.Web",
   "BasePath": "_content/LMS.Web",
   "Mode": "Default",
@@ -129,6 +129,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\favicon.png"
+    },
+    {
+      "Identity": "C:\\Users\\iakwv\\Desktop\\Learning Management System\\LMS.Web\\wwwroot\\js\\dragDrop.js",
+      "SourceId": "LMS.Web",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\iakwv\\Desktop\\Learning Management System\\LMS.Web\\wwwroot\\",
+      "BasePath": "_content/LMS.Web",
+      "RelativePath": "js/dragDrop.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\js\\dragDrop.js"
     }
   ]
 }

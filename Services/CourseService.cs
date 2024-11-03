@@ -218,4 +218,58 @@ public class CourseService
             throw;
         }
     }
+
+    public async Task UpdateModuleOrderAsync(int courseId, int moduleId, int newOrder)
+    {
+        try
+        {
+            var course = await _courseRepository.GetCourseWithModulesAsync(courseId);
+            if (course == null)
+            {
+                _notificationService.ShowError("Course not found");
+                return;
+            }
+
+            var modules = course.Modules.OrderBy(m => m.Order).ToList();
+            var moduleToMove = modules.FirstOrDefault(m => m.Id == moduleId);
+            
+            if (moduleToMove == null)
+            {
+                _notificationService.ShowError("Module not found");
+                return;
+            }
+
+            var oldOrder = moduleToMove.Order;
+            var newOrderAdjusted = Math.Max(1, Math.Min(newOrder, modules.Count));
+
+            if (oldOrder == newOrderAdjusted) return;
+
+            // Update orders for all affected modules
+            if (oldOrder < newOrderAdjusted)
+            {
+                // Moving down
+                foreach (var module in modules.Where(m => m.Order > oldOrder && m.Order <= newOrderAdjusted))
+                {
+                    module.Order--;
+                }
+            }
+            else
+            {
+                // Moving up
+                foreach (var module in modules.Where(m => m.Order >= newOrderAdjusted && m.Order < oldOrder))
+                {
+                    module.Order++;
+                }
+            }
+
+            moduleToMove.Order = newOrderAdjusted;
+            await _courseRepository.UpdateAsync(course);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error reordering module {ModuleId} in course {CourseId}", moduleId, courseId);
+            _notificationService.ShowError("Failed to reorder module");
+            throw;
+        }
+    }
 } 
