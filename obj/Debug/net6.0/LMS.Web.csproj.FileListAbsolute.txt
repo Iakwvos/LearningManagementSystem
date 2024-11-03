@@ -1,0 +1,7 @@
+C:\Users\iakwv\Desktop\Learning Management System\LMS.Web\obj\Debug\net6.0\LMS.Web.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\iakwv\Desktop\Learning Management System\LMS.Web\obj\Debug\net6.0\LMS.Web.AssemblyInfoInputs.cache
+C:\Users\iakwv\Desktop\Learning Management System\LMS.Web\obj\Debug\net6.0\LMS.Web.AssemblyInfo.cs
+C:\Users\iakwv\Desktop\Learning Management System\LMS.Web\obj\Debug\net6.0\LMS.Web.csproj.CoreCompileInputs.cache
+C:\Users\iakwv\Desktop\Learning Management System\LMS.Web\obj\Debug\net6.0\LMS.Web.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\iakwv\Desktop\Learning Management System\LMS.Web\obj\Debug\net6.0\LMS.Web.RazorAssemblyInfo.cache
+C:\Users\iakwv\Desktop\Learning Management System\LMS.Web\obj\Debug\net6.0\LMS.Web.RazorAssemblyInfo.cs

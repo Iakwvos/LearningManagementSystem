@@ -1,0 +1,72 @@
+@page "/courses"
+@inject NavigationManager NavigationManager
+@inject CourseService CourseService
+
+<div class="min-h-screen bg-gray-100 p-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-900">Available Courses</h1>
+            <button @onclick="NavigateToAdd"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                Add New Course
+            </button>
+        </div>
+
+        @if (courses == null)
+        {
+            <LoadingSpinner />
+        }
+        else
+        {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach (var course in courses)
+                {
+                    <div class="bg-white rounded-lg shadow-md">
+                        @if (!string.IsNullOrEmpty(course.ImageUrl))
+                        {
+                            <img src="@course.ImageUrl" alt="@course.Title" class="w-full h-48 object-cover rounded-t-lg"/>
+                        }
+                        else
+                        {
+                            <div class="w-full h-48 bg-gray-200 flex items-center justify-center rounded-t-lg">
+                                <span class="text-gray-400">No image available</span>
+                            </div>
+                        }
+                        <div class="p-4">
+                            <h2 class="text-xl font-bold text-gray-900 mb-2">@course.Title</h2>
+                            <p class="text-gray-600 mb-4">@course.Description</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-500">
+                                    @course.Modules.Count modules
+                                </span>
+                                <button @onclick="@(() => NavigateToCourse(course.Id))"
+                                        class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                                    View Course
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private IEnumerable<Course>? courses;
+
+    protected override async Task OnInitializedAsync()
+    {
+        courses = await CourseService.GetAllCoursesAsync();
+    }
+
+    private void NavigateToAdd()
+    {
+        NavigationManager.NavigateTo("/courses/add");
+    }
+
+    private void NavigateToCourse(int id)
+    {
+        NavigationManager.NavigateTo($"/courses/{id}");
+    }
+} 

@@ -1,0 +1,83 @@
+@page "/courses/edit/{Id:int}"
+@inject NavigationManager NavigationManager
+@inject CourseService CourseService
+@inject NotificationService NotificationService
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+        @if (courseModel == null)
+        {
+            <LoadingSpinner />
+        }
+        else
+        {
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h1 class="text-2xl font-bold text-gray-900">Edit Course</h1>
+                </div>
+                <div class="p-6">
+                    <CourseForm 
+                        CourseModel="@courseModel"
+                        OnValidSubmit="@HandleValidSubmit"
+                        OnCancel="@HandleCancel" />
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private CourseModel? courseModel;
+
+    protected override async Task OnInitializedAsync()
+    {
+        courseModel = await LoadCourseModelAsync();
+    }
+
+    private async Task HandleValidSubmit(CourseModel model)
+    {
+        try
+        {
+            await CourseService.UpdateCourseAsync(Id, model);
+            NotificationService.ShowSuccess("Course updated successfully");
+            NavigationManager.NavigateTo($"/courses/{Id}");
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError("Failed to update course");
+        }
+    }
+
+    private void HandleCancel()
+    {
+        NavigationManager.NavigateTo($"/courses/{Id}");
+    }
+
+    private async Task<CourseModel> LoadCourseModelAsync()
+    {
+        var course = await CourseService.GetCourseAsync(Id);
+        if (course == null)
+        {
+            NotificationService.ShowError("Course not found");
+            NavigationManager.NavigateTo("/courses");
+            return new CourseModel();
+        }
+
+        return new CourseModel
+        {
+            Id = course.Id,
+            Title = course.Title,
+            Description = course.Description,
+            ImageUrl = course.ImageUrl ?? string.Empty
+        };
+    }
+} 
+
+    private void HandleCancel()
+    {
+        NavigationManager.NavigateTo($"/courses/{Id}");
+    }
+} 

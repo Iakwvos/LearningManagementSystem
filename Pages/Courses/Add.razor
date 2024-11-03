@@ -1,0 +1,46 @@
+@page "/courses/add"
+@inject NavigationManager NavigationManager
+@inject CourseService CourseService
+
+<ErrorBoundary>
+    <ChildContent>
+        <div class="container mx-auto px-4 py-8">
+            <div class="max-w-3xl mx-auto">
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h1 class="text-2xl font-bold text-gray-900">Create New Course</h1>
+                    </div>
+                    <div class="p-6">
+                        <CourseForm 
+                            CourseModel="@courseModel"
+                            OnValidSubmit="@HandleValidSubmit"
+                            OnCancel="@HandleCancel" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ChildContent>
+    <ErrorContent>
+        <div class="text-center py-8">
+            <div class="text-red-500 text-xl">An error occurred while processing your request.</div>
+            <button @onclick="@HandleCancel" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded">
+                Return to Courses
+            </button>
+        </div>
+    </ErrorContent>
+</ErrorBoundary>
+
+@code {
+    private CourseModel courseModel = new();
+
+    private async Task HandleValidSubmit(CourseModel model)
+    {
+        await CourseService.CreateCourseAsync(model);
+        NavigationManager.NavigateTo("/courses");
+    }
+
+    private void HandleCancel()
+    {
+        NavigationManager.NavigateTo("/courses");
+    }
+} 
