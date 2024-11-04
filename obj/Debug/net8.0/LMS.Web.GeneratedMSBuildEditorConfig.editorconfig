@@ -42,8 +42,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW5kZXgucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/iakwv/Desktop/Learning Management System/LMS.Web/Pages/Modules/Details.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTW9kdWxlc1xEZXRhaWxzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/iakwv/Desktop/Learning Management System/LMS.Web/Shared/CourseForm.razor]
 build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXENvdXJzZUZvcm0ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/iakwv/Desktop/Learning Management System/LMS.Web/Shared/FileUpload.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXEZpbGVVcGxvYWQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/iakwv/Desktop/Learning Management System/LMS.Web/Shared/LessonForm.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXExlc3NvbkZvcm0ucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/iakwv/Desktop/Learning Management System/LMS.Web/Shared/LoadingSpinner.razor]

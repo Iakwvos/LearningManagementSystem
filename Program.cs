@@ -17,6 +17,8 @@ builder.Services.AddInfrastructure(connectionString);
 
 builder.Services.AddScoped<CourseService>();
 builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<LessonService>();
+builder.Services.AddScoped<IFileService, FileService>();
 
 var app = builder.Build();
 

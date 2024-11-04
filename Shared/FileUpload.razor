@@ -1,0 +1,39 @@
+@inject IFileService FileService
+@inject NotificationService NotificationService
+
+<div class="space-y-4">
+    <InputFile OnChange="OnFileSelected" class="hidden" id="@($"file-upload-{Id}")" multiple="@AllowMultiple" accept="@Accept" />
+    <label for="@($"file-upload-{Id}")" class="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+        <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        </svg>
+        @ButtonText
+    </label>
+</div>
+
+@code {
+    [Parameter] public string Id { get; set; } = Guid.NewGuid().ToString();
+    [Parameter] public string ButtonText { get; set; } = "Upload File";
+    [Parameter] public string Accept { get; set; } = ".pdf,.doc,.docx,.txt";
+    [Parameter] public bool AllowMultiple { get; set; } = false;
+    [Parameter] public string Folder { get; set; } = "attachments";
+    [Parameter] public EventCallback<string> OnFileUploaded { get; set; }
+
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            var files = AllowMultiple ? e.GetMultipleFiles(5) : new[] { e.File };
+            foreach (var file in files)
+            {
+                var fileUrl = await FileService.UploadFileAsync(file, Folder);
+                await OnFileUploaded.InvokeAsync(fileUrl);
+                NotificationService.ShowSuccess($"File {file.Name} uploaded successfully");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError($"Upload failed: {ex.Message}");
+        }
+    }
+} 
