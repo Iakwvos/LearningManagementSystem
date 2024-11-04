@@ -29,6 +29,34 @@
       "PackagePath": "staticwebassets\\js\\dragDrop.js"
     },
     {
+      "Id": "C:\\Users\\iakwv\\Desktop\\Learning Management System\\LMS.Web\\wwwroot\\uploads\\attachments\\3536947b-983e-4c9b-ba3c-2e4b2389755a.txt",
+      "PackagePath": "staticwebassets\\uploads\\attachments\\3536947b-983e-4c9b-ba3c-2e4b2389755a.txt"
+    },
+    {
+      "Id": "C:\\Users\\iakwv\\Desktop\\Learning Management System\\LMS.Web\\wwwroot\\uploads\\attachments\\3f29311a-b1cb-4d89-a632-e39d80fc70fc.txt",
+      "PackagePath": "staticwebassets\\uploads\\attachments\\3f29311a-b1cb-4d89-a632-e39d80fc70fc.txt"
+    },
+    {
+      "Id": "C:\\Users\\iakwv\\Desktop\\Learning Management System\\LMS.Web\\wwwroot\\uploads\\lessons\\0\\attachments\\5ca25ee1-bd34-45ca-a9a1-c71fa08c665c.txt",
+      "PackagePath": "staticwebassets\\uploads\\lessons\\0\\attachments\\5ca25ee1-bd34-45ca-a9a1-c71fa08c665c.txt"
+    },
+    {
+      "Id": "C:\\Users\\iakwv\\Desktop\\Learning Management System\\LMS.Web\\wwwroot\\uploads\\lessons\\0\\attachments\\b29cac73-3351-4073-b27a-bbe2799272b3.txt",
+      "PackagePath": "staticwebassets\\uploads\\lessons\\0\\attachments\\b29cac73-3351-4073-b27a-bbe2799272b3.txt"
+    },
+    {
+      "Id": "C:\\Users\\iakwv\\Desktop\\Learning Management System\\LMS.Web\\wwwroot\\uploads\\lessons\\0\\attachments\\f75897a7-fe58-4dfa-a13e-0d44b2ed811f.pdf",
+      "PackagePath": "staticwebassets\\uploads\\lessons\\0\\attachments\\f75897a7-fe58-4dfa-a13e-0d44b2ed811f.pdf"
+    },
+    {
+      "Id": "C:\\Users\\iakwv\\Desktop\\Learning Management System\\LMS.Web\\wwwroot\\uploads\\lessons\\0\\attachments\\fa973074-14b8-468d-a125-19ba776586df.txt",
+      "PackagePath": "staticwebassets\\uploads\\lessons\\0\\attachments\\fa973074-14b8-468d-a125-19ba776586df.txt"
+    },
+    {
+      "Id": "C:\\Users\\iakwv\\Desktop\\Learning Management System\\LMS.Web\\wwwroot\\uploads\\lessons\\1\\attachments\\3b679042-98f5-4332-83cf-17fbd8c1b14c.txt",
+      "PackagePath": "staticwebassets\\uploads\\lessons\\1\\attachments\\3b679042-98f5-4332-83cf-17fbd8c1b14c.txt"
+    },
+    {
       "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.LMS.Web.Microsoft.AspNetCore.StaticWebAssets.props",
       "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
     },

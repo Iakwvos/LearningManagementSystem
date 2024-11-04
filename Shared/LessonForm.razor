@@ -1,52 +1,44 @@
 @using LMS.Web.Models
+@inject IFileService FileService
+@inject NotificationService NotificationService
 
-<EditForm Model="@LessonModel" OnSubmit="@HandleSubmit">
+<EditForm Model="@LessonModel" OnValidSubmit="@HandleSubmit">
     <DataAnnotationsValidator />
+    <ValidationSummary />
 
-    <div class="space-y-4">
+    <div class="space-y-6">
         <div>
             <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
-            <InputText @bind-Value="LessonModel.Title" 
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" 
-                      id="title" />
+            <div class="mt-1">
+                <InputText @bind-Value="LessonModel.Title" 
+                          class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" 
+                          id="title" />
+            </div>
             <ValidationMessage For="@(() => LessonModel.Title)" class="text-sm text-red-600" />
         </div>
 
         <div>
             <label for="content" class="block text-sm font-medium text-gray-700">Content</label>
-            <InputTextArea @bind-Value="LessonModel.Content" 
-                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" 
-                         id="content" rows="5" />
+            <div class="mt-1">
+                <InputTextArea @bind-Value="LessonModel.Content" 
+                             class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" 
+                             id="content" 
+                             rows="5" />
+            </div>
             <ValidationMessage For="@(() => LessonModel.Content)" class="text-sm text-red-600" />
         </div>
 
         <div>
-            <label for="order" class="block text-sm font-medium text-gray-700">Order</label>
-            <InputNumber @bind-Value="LessonModel.Order" 
-                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" 
-                       id="order" />
-            <ValidationMessage For="@(() => LessonModel.Order)" class="text-sm text-red-600" />
-        </div>
-
-        <div class="mt-4">
-            <label class="block text-sm font-medium text-gray-700">Attachments</label>
-            <div class="mt-1">
-                <FileUpload 
-                    ButtonText="Add Attachment" 
-                    Folder="@($"lessons/{LessonModel.Id}/attachments")"
-                    OnFileUploaded="HandleFileUploaded" />
-            </div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Attachments</label>
             @if (LessonModel.Attachments?.Any() == true)
             {
-                <div class="mt-2 space-y-2">
+                <div class="space-y-2 mb-4">
                     @foreach (var attachment in LessonModel.Attachments)
                     {
-                        <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
-                            <a href="@attachment.FileUrl" target="_blank" class="text-blue-600 hover:underline">
-                                @attachment.Title
-                            </a>
-                            <button @onclick="() => RemoveAttachment(attachment)" class="text-red-600 hover:text-red-800">
-                                <span class="sr-only">Remove</span>
+                        <div class="flex items-center justify-between p-2 bg-gray-50 rounded-md">
+                            <span class="text-sm text-gray-900">@attachment.Title</span>
+                            <button type="button" @onclick="() => RemoveAttachment(attachment)" 
+                                    class="text-red-600 hover:text-red-800">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
@@ -55,60 +47,94 @@
                     }
                 </div>
             }
+            <InputFile OnChange="OnFileSelected" 
+                      class="block w-full text-sm text-gray-500
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded-md file:border-0
+                            file:text-sm file:font-semibold
+                            file:bg-blue-50 file:text-blue-700
+                            hover:file:bg-blue-100"
+                      multiple
+                      accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" />
         </div>
 
-        <div class="flex justify-end space-x-3 pt-4">
+        <div class="flex justify-end space-x-3 pt-5">
             <button type="button" 
-                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                    @onclick="OnCancel">
+                    @onclick="OnCancel"
+                    class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
                 Cancel
             </button>
             <button type="submit" 
-                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">
-                @(LessonModel.Id == 0 ? "Add Lesson" : "Save Changes")
+                    class="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700">
+                @(LessonModel.Id == 0 ? "Create" : "Update")
             </button>
         </div>
     </div>
 </EditForm>
 
 @code {
-    [Parameter]
-    public LessonModel LessonModel { get; set; } = new();
+    [Parameter] public LessonModel LessonModel { get; set; } = new();
+    [Parameter] public EventCallback<LessonModel> OnValidSubmit { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
 
-    [Parameter]
-    public EventCallback<LessonModel> OnValidSubmit { get; set; }
-
-    [Parameter]
-    public EventCallback OnCancel { get; set; }
-
-    [Inject]
-    public IWebHostEnvironment _environment { get; set; }
-
-    private async Task HandleSubmit(EditContext context)
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
     {
-        if (context.Validate())
+        try
         {
-            await OnValidSubmit.InvokeAsync(LessonModel);
+            foreach (var file in e.GetMultipleFiles(10)) // Limit to 10 files
+            {
+                if (file.Size > 10 * 1024 * 1024) // 10MB limit
+                {
+                    NotificationService.ShowError($"File {file.Name} is too large. Maximum size is 10MB.");
+                    continue;
+                }
+
+                var fileUrl = await FileService.UploadFileAsync(file, $"lessons/{LessonModel.ModuleId}/attachments");
+                
+                LessonModel.Attachments.Add(new AttachmentModel
+                {
+                    Title = file.Name,
+                    FileUrl = fileUrl,
+                    FileType = Path.GetExtension(file.Name),
+                    FileSize = file.Size
+                });
+            }
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError($"Error uploading file: {ex.Message}");
         }
     }
 
-    private async Task HandleFileUploaded(string fileUrl)
+    private async Task RemoveAttachment(AttachmentModel attachment)
     {
-        await Task.Run(() => 
+        try
         {
-            LessonModel.Attachments ??= new List<AttachmentModel>();
-            LessonModel.Attachments.Add(new AttachmentModel
+            if (attachment.Id == 0) // Only delete file if it's a new attachment
             {
-                Title = Path.GetFileName(fileUrl),
-                FileUrl = fileUrl,
-                FileType = Path.GetExtension(fileUrl),
-                FileSize = new FileInfo(Path.Combine(_environment.WebRootPath, fileUrl.TrimStart('/'))).Length
-            });
-        });
+                await FileService.DeleteFileAsync(attachment.FileUrl);
+            }
+            LessonModel.Attachments.Remove(attachment);
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError($"Error removing attachment: {ex.Message}");
+        }
     }
 
-    private void RemoveAttachment(AttachmentModel attachment)
+    private async Task HandleSubmit(EditContext context)
     {
-        LessonModel.Attachments?.Remove(attachment);
+        try
+        {
+            if (context.Validate())
+            {
+                await OnValidSubmit.InvokeAsync(LessonModel);
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError($"Error submitting form: {ex.Message}");
+        }
     }
 } 

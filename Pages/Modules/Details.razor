@@ -1,116 +1,101 @@
 @page "/modules/{Id:int}"
+@using LMS.Core.Entities
+@using LMS.Core.Interfaces
+@using LMS.Web.Models
+@inject IModuleRepository ModuleRepository
 @inject NavigationManager NavigationManager
-@inject CourseService CourseService
-@inject LessonService LessonService
 @inject NotificationService NotificationService
+@inject LessonService LessonService
+@inject ILogger<Details> Logger
+@implements IDisposable
 
-<div class="min-h-screen bg-gray-100 p-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     @if (module == null)
     {
         <LoadingSpinner />
     }
     else
     {
-        <div class="max-w-7xl mx-auto">
-            <div class="bg-white rounded-lg shadow-md">
-                <div class="p-6">
-                    <div class="flex justify-between items-start mb-6">
-                        <div>
-                            <h1 class="text-3xl font-bold text-gray-900 mb-2">@module.Title</h1>
-                            <p class="text-gray-600">@module.Description</p>
-                        </div>
-                        <button @onclick="@(() => NavigationManager.NavigateTo($"/courses/{module.CourseId}"))"
-                                class="text-gray-600 hover:text-gray-900">
-                            Back to Course
-                        </button>
+        <div class="bg-white rounded-lg shadow">
+            <!-- Header -->
+            <div class="px-6 py-5 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">@module.Title</h1>
+                        <p class="mt-1 text-sm text-gray-500">@module.Description</p>
                     </div>
-
-                    <div class="border-t border-gray-200 pt-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-xl font-semibold text-gray-900">Lessons</h2>
-                            <button @onclick="() => showAddLesson = true"
-                                    class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-                                Add Lesson
-                            </button>
-                        </div>
-
-                        @if (showAddLesson)
-                        {
-                            <div class="mb-6 bg-gray-50 p-4 rounded-lg">
-                                <h3 class="text-lg font-medium text-gray-900 mb-4">Add New Lesson</h3>
-                                <LessonForm 
-                                    LessonModel="@newLesson"
-                                    OnValidSubmit="@HandleAddLesson"
-                                    OnCancel="@(() => showAddLesson = false)" />
-                            </div>
-                        }
-
-                        @if (!module.Lessons.Any())
-                        {
-                            <p class="text-gray-500 italic">No lessons available for this module.</p>
-                        }
-                        else
-                        {
-                            <div class="space-y-4">
-                                @foreach (var lesson in module.Lessons.OrderBy(l => l.Order))
-                                {
-                                    <div class="border border-gray-200 rounded-lg p-4 draggable-item @(draggedLessonId == lesson.Id ? "dragging" : "") @(dragOverLessonId == lesson.Id ? "drag-over" : "")"
-                                         draggable="true"
-                                         @ondragstart="@(() => HandleDragStart(lesson))"
-                                         @ondragend="@(() => HandleDragEnd())"
-                                         @ondragover:preventDefault
-                                         @ondragover="@(() => HandleDragOver(lesson))"
-                                         @ondragleave="@(() => HandleDragLeave())"
-                                         @ondrop="@(() => HandleDrop(lesson))">
-                                        <div class="flex justify-between items-start">
-                                            <div class="flex items-center space-x-3">
-                                                <div class="text-gray-400">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                              d="M4 8h16M4 16h16" />
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <h3 class="text-lg font-medium text-gray-900">@lesson.Title</h3>
-                                                    <p class="text-gray-600 mt-1">@lesson.Content</p>
-                                                </div>
-                                            </div>
-                                            <div class="flex space-x-2">
-                                                <button @onclick="() => ShowEditLesson(lesson)"
-                                                        class="text-blue-600 hover:text-blue-700">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                    </svg>
-                                                </button>
-                                                <button @onclick="() => DeleteLesson(lesson)"
-                                                        class="text-red-600 hover:text-red-700">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        }
-                    </div>
+                    <button @onclick="NavigateBack" 
+                            class="inline-flex items-center px-4 py-2 text-sm text-gray-700 hover:text-gray-900">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Back to course
+                    </button>
                 </div>
+            </div>
+
+            <!-- Content -->
+            <div class="px-6 py-5">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-lg font-medium text-gray-900">Lessons</h2>
+                    <button @onclick="ShowAddLesson"
+                            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Add Lesson
+                    </button>
+                </div>
+
+                @if (!module.Lessons.Any())
+                {
+                    <div class="text-center py-12">
+                        <p class="text-sm text-gray-500">
+                            Click 'Add Lesson' to create your first lesson.
+                        </p>
+                    </div>
+                }
+                else
+                {
+                    <div class="space-y-4">
+                        @foreach (var lesson in module.Lessons.OrderBy(l => l.Order))
+                        {
+                            <div class="border rounded-lg p-4 hover:bg-gray-50">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="text-lg font-medium text-gray-900">@lesson.Title</h3>
+                                        <p class="mt-1 text-sm text-gray-500">
+                                            @(lesson.Content.Length > 100 ? $"{lesson.Content[..100]}..." : lesson.Content)
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center space-x-4">
+                                        <button @onclick="() => ShowEditLesson(lesson)"
+                                                class="text-gray-400 hover:text-blue-600">
+                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </button>
+                                        <button @onclick="() => DeleteLesson(lesson)"
+                                                class="text-gray-400 hover:text-red-600">
+                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
             </div>
         </div>
     }
 </div>
 
-<Modal Show="showEditLesson" Title="Edit Lesson" OnClose="@(() => CancelEdit())">
-    @if (editingLesson != null)
-    {
-        <LessonForm 
-            LessonModel="@editingLesson"
-            OnValidSubmit="@HandleEditLesson"
-            OnCancel="@(() => CancelEdit())" />
-    }
+<Modal Show="showLessonModal" 
+       Title="@(editingLesson == null ? "Add Lesson" : "Edit Lesson")" 
+       OnClose="CloseLessonModal">
+    <LessonForm 
+        LessonModel="@currentLesson"
+        OnValidSubmit="@HandleLessonSubmit"
+        OnCancel="@CloseLessonModal" />
 </Modal>
 
 @code {
@@ -118,88 +103,96 @@
     public int Id { get; set; }
 
     private Module? module;
-    private bool showAddLesson;
-    private bool showEditLesson;
-    private LessonModel newLesson = new();
-    private LessonModel? editingLesson;
-    private int? draggedLessonId;
-    private int? dragOverLessonId;
-    private Lesson? draggedLesson;
+    private bool showLessonModal;
+    private LessonModel currentLesson = new();
+    private Lesson? editingLesson;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadModule();
-        newLesson = new LessonModel 
-        { 
-            ModuleId = Id,
-            Order = module?.Lessons.Count + 1 ?? 1
-        };
     }
 
     private async Task LoadModule()
     {
-        var course = await CourseService.GetCourseAsync(Id);
-        module = course?.Modules.FirstOrDefault(m => m.Id == Id);
-        
-        if (module == null)
-        {
-            NavigationManager.NavigateTo("/courses");
-            NotificationService.ShowError("Module not found");
-        }
-    }
-
-    private async Task HandleAddLesson(LessonModel model)
-    {
         try
         {
-            await LessonService.AddLessonAsync(Id, model);
-            await LoadModule();
-            showAddLesson = false;
-            newLesson = new LessonModel 
-            { 
-                ModuleId = Id,
-                Order = module?.Lessons.Count + 1 ?? 1
-            };
-            NotificationService.ShowSuccess("Lesson added successfully");
+            module = await ModuleRepository.GetModuleWithLessonsAsync(Id);
+            if (module == null)
+            {
+                NotificationService.ShowError("Module not found");
+                NavigationManager.NavigateTo("/courses");
+            }
         }
         catch (Exception ex)
         {
-            NotificationService.ShowError($"Failed to add lesson: {ex.Message}");
+            NotificationService.ShowError($"Error loading module: {ex.Message}");
+            NavigationManager.NavigateTo("/courses");
         }
+    }
+
+    private void ShowAddLesson()
+    {
+        currentLesson = new LessonModel 
+        { 
+            ModuleId = Id,
+            Order = module?.Lessons.Count ?? 0 + 1
+        };
+        editingLesson = null;
+        showLessonModal = true;
+        StateHasChanged(); // Ensure UI updates
     }
 
     private void ShowEditLesson(Lesson lesson)
     {
-        editingLesson = new LessonModel
+        editingLesson = lesson;
+        currentLesson = new LessonModel
         {
             Id = lesson.Id,
             Title = lesson.Title,
             Content = lesson.Content,
             Order = lesson.Order,
-            ModuleId = Id
+            ModuleId = Id,
+            Attachments = lesson.Attachments.Select(a => new AttachmentModel
+            {
+                Id = a.Id,
+                Title = a.Title,
+                FileUrl = a.FileUrl,
+                FileType = a.FileType,
+                FileSize = a.FileSize
+            }).ToList()
         };
-        showEditLesson = true;
+        showLessonModal = true;
     }
 
-    private void CancelEdit()
-    {
-        showEditLesson = false;
-        editingLesson = null;
-    }
-
-    private async Task HandleEditLesson(LessonModel model)
+    private async Task HandleLessonSubmit(LessonModel model)
     {
         try
         {
-            await LessonService.UpdateLessonAsync(model);
-            await LoadModule();
-            showEditLesson = false;
-            editingLesson = null;
-            NotificationService.ShowSuccess("Lesson updated successfully");
+            Logger.LogInformation("Handling lesson submit..."); // Debug log
+            bool success;
+
+            if (editingLesson == null)
+            {
+                Logger.LogInformation("Creating new lesson..."); // Debug log
+                success = await LessonService.CreateLessonAsync(model);
+            }
+            else
+            {
+                Logger.LogInformation("Updating existing lesson..."); // Debug log
+                success = await LessonService.UpdateLessonAsync(model);
+            }
+
+            if (success)
+            {
+                Logger.LogInformation("Lesson saved successfully"); // Debug log
+                await LoadModule();
+                CloseLessonModal();
+            }
         }
         catch (Exception ex)
         {
-            NotificationService.ShowError($"Failed to update lesson: {ex.Message}");
+            Logger.LogError(ex, "Error saving lesson"); // Debug log
+            NotificationService.ShowError($"Error saving lesson: {ex.Message}");
         }
     }
 
@@ -207,99 +200,40 @@
     {
         try
         {
-            await LessonService.DeleteLessonAsync(Id, lesson.Id);
-            await LoadModule();
-            NotificationService.ShowSuccess("Lesson deleted successfully");
-        }
-        catch (Exception ex)
-        {
-            NotificationService.ShowError($"Failed to delete lesson: {ex.Message}");
-        }
-    }
-
-    private async Task HandleDragStart(Lesson lesson)
-    {
-        draggedLesson = lesson;
-        draggedLessonId = lesson.Id;
-        await Task.Delay(1); // Allow UI to update
-    }
-
-    private async Task HandleDragEnd()
-    {
-        draggedLesson = null;
-        draggedLessonId = null;
-        dragOverLessonId = null;
-        await Task.Delay(1); // Allow UI to update
-    }
-
-    private void HandleDragOver(Lesson lesson)
-    {
-        if (lesson.Id != draggedLessonId)
-        {
-            dragOverLessonId = lesson.Id;
-        }
-    }
-
-    private void HandleDragLeave()
-    {
-        dragOverLessonId = null;
-    }
-
-    private async Task HandleDrop(Lesson targetLesson)
-    {
-        if (draggedLesson == null || draggedLesson.Id == targetLesson.Id) return;
-
-        try
-        {
-            var draggedOrder = draggedLesson.Order;
-            var targetOrder = targetLesson.Order;
-
-            // Optimize the update by only changing affected lessons
-            var affectedLessons = module?.Lessons
-                .Where(l => l.Order >= Math.Min(draggedOrder, targetOrder) 
-                           && l.Order <= Math.Max(draggedOrder, targetOrder))
-                .OrderBy(l => l.Order)
-                .ToList();
-
-            if (affectedLessons != null)
+            if (await LessonService.DeleteLessonAsync(lesson.Id, Id))
             {
-                foreach (var lesson in affectedLessons)
-                {
-                    if (lesson.Id == draggedLesson.Id)
-                    {
-                        lesson.Order = targetOrder;
-                    }
-                    else if (draggedOrder < targetOrder)
-                    {
-                        lesson.Order--;
-                    }
-                    else
-                    {
-                        lesson.Order++;
-                    }
-                }
+                await LoadModule();
             }
-
-            var lessonModel = new LessonModel
-            {
-                Id = draggedLesson.Id,
-                Title = draggedLesson.Title,
-                Content = draggedLesson.Content,
-                Order = targetOrder,
-                ModuleId = module!.Id
-            };
-
-            await LessonService.UpdateLessonAsync(lessonModel);
-            await LoadModule();
-            NotificationService.ShowSuccess("Lesson order updated");
         }
         catch (Exception ex)
         {
-            NotificationService.ShowError($"Failed to reorder lesson: {ex.Message}");
-        }
-        finally
-        {
-            await HandleDragEnd();
+            NotificationService.ShowError($"Error deleting lesson: {ex.Message}");
         }
     }
+
+    private void CloseLessonModal()
+    {
+        showLessonModal = false;
+        currentLesson = new LessonModel();
+        editingLesson = null;
+        StateHasChanged(); // Ensure UI updates
+    }
+
+    private void NavigateBack()
+    {
+        if (module?.Course != null)
+        {
+            NavigationManager.NavigateTo($"/courses/{module.Course.Id}");
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/courses");
+        }
+    }
+
+    public void Dispose()
+    {
+        // Cleanup code if needed
+    }
+} 
 } 

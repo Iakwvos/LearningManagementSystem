@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using LMS.Web.Data;
-using LMS.Infrastructure;
-using LMS.Web.Services;
+using LMS.Web.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,15 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-// Add Infrastructure services
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddInfrastructure(connectionString);
-
-builder.Services.AddScoped<CourseService>();
-builder.Services.AddScoped<NotificationService>();
-builder.Services.AddScoped<LessonService>();
-builder.Services.AddScoped<IFileService, FileService>();
+// Add application services
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddApplicationServices(connectionString ?? 
+    throw new InvalidOperationException("Connection string not found."));
 
 var app = builder.Build();
 
